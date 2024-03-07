@@ -6,7 +6,7 @@
 /*   By: jikarunw <jikarunw@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/24 22:20:35 by jikarunw          #+#    #+#             */
-/*   Updated: 2024/01/26 20:08:15 by jikarunw         ###   ########.fr       */
+/*   Updated: 2024/03/04 03:14:10 by jikarunw         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,29 +14,26 @@
 
 int	ft_atoi(const char *str)
 {
-	long long int	i;
-	int				mod;
+	int	number;
+	int	sign;
+	int	i;
 
+	sign = 1;
+	number = 0;
 	i = 0;
-	mod = 1;
-	while (*str == ' ' || *str == '\t' || *str == '\n' || *str == '\f'
-		|| *str == '\v' || *str == '\r')
-		str++;
-	if (*str == '-')
+	while ((str[i] >= 9 && str[i] <= 13) || str[i] == 32)
+		i++;
+	if (str[i] == '+')
+		i++;
+	else if (str[i] == '-')
 	{
-		mod = -1;
-		str++;
+		i++;
+		sign = -1;
 	}
-	else if (*str == '+')
-		str++;
-	while (*str)
+	while (str[i] >= '0' && str[i] <= '9')
 	{
-		if (!ft_isdigit(*str))
-			write(2, "Error", 5);
-		i = i * 10 + (*str - 48);
-		str++;
+		number = (number * 10) + (str[i] - '0');
+		i++;
 	}
-	if ((mod * i) > 2147483647 || (mod * i) < -2147483648)
-		write(2, "Error", 5);
-	return (mod * i);
+	return (number * sign);
 }

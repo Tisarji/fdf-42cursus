@@ -6,7 +6,7 @@
 /*   By: jikarunw <jikarunw@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/29 23:28:53 by jikarunw          #+#    #+#             */
-/*   Updated: 2023/09/08 21:18:53 by jikarunw         ###   ########.fr       */
+/*   Updated: 2024/03/04 03:12:57 by jikarunw         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,7 @@
 
 void	*ft_memset(void *b, int c, size_t len)
 {
-	unsigned char	*dest_ptr;
-
-	dest_ptr = (unsigned char *)b;
-	while (len--)
-		*dest_ptr++ = (unsigned char)c;
+	while (len-- > 0)
+		*(unsigned char *)(b + len) = c;
 	return (b);
 }

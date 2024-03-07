@@ -19,7 +19,7 @@ CFLAGS = -Wall -Wextra -Werror -g -I $(PATH_HEADER)
 PATH_HEADER = include
 PATH_LIBFT = include/libft
 PATH_SRCS = srcs
-PATH_OBJ = obj_dir
+PATH_OBJ = objs
 
 PATH_MLX = include/MLX42
 MLX = ./include/MLX42/build/libmlx42.a
@@ -69,6 +69,7 @@ clean:
 	@make clean -C $(PATH_LIBFT)
 	@$(RM) $(PATH_MLX)/build
 	@$(RM) $(PATH_OBJ)
+	@$(RM) .DS_Store
 	@echo "$(COLOR_RED)Cleaned up object files$(COLOR_RESET)"
 
 fclean: clean
