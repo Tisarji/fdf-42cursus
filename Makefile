@@ -6,20 +6,17 @@ COLOR_RED = \033[91m
 COLOR_GREEN = \033[92m
 COLOR_PINK = \033[95m
 
-# Project Name
+
 NAME = fdf
 
-RM = rm -rf
-
-# Compiler and Flags
-CC = gcc
-CFLAGS = -Wall -Wextra -Werror -g -I $(PATH_HEADER)
-
-# Paths
-PATH_HEADER = include
+PATH_HEADER = includes
 PATH_LIBFT = include/libft
 PATH_SRCS = srcs
 PATH_OBJ = objs
+
+RM = rm -rf
+CC = gcc
+CFLAGS = -Wall -Wextra -Werror -g -I $(PATH_HEADER)
 
 PATH_MLX = include/MLX42
 MLX = ./include/MLX42/build/libmlx42.a
@@ -37,18 +34,13 @@ TOOLS_SRC		=	keyboard.c			\
 					mouse.c				\
 					view.c
 
-# Prepending the path
 ALGORITHM_SRCS = $(addprefix $(PATH_SRCS)/algorithm/, $(ALGORITHM_SRC))
 ERRORHANDLE_SRCS = $(addprefix $(PATH_SRCS)/errorhandle/, $(ERRORHANDLE_SRC))
 TOOLS_SRCS = $(addprefix $(PATH_SRCS)/tools/, $(TOOLS_SRC))
 
-# Combining All Sources
 SRCS = $(PATH_SRCS)/fdf.c $(ALGORITHM_SRCS) $(ERRORHANDLE_SRCS) $(TOOLS_SRCS)
-
-# Object Files
 OBJS = $(addprefix $(PATH_OBJ)/, $(patsubst $(PATH_SRCS)/%.c, %.o, $(SRCS)))
 
-# Rules
 all: $(NAME)
 
 $(NAME): $(OBJS) $(MLX)
