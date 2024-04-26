@@ -6,69 +6,78 @@ COLOR_RED = \033[91m
 COLOR_GREEN = \033[92m
 COLOR_PINK = \033[95m
 
-
 NAME = fdf
 
-PATH_HEADER = includes
-PATH_LIBFT = include/libft
+PATH_LIBFT = libft
 PATH_SRCS = srcs
-PATH_OBJ = objs
+
+PATH_HEADER = includes
+OBJ_DIR = objs
 
 RM = rm -rf
-CC = gcc
-CFLAGS = -Wall -Wextra -Werror -g -I $(PATH_HEADER)
+CC = cc
+CFLAGS := -Wextra -Wall -Werror -Wunreachable-code -Ofast
+LIBMLX := ./includes/MLX42
 
-PATH_MLX = include/MLX42
-MLX = ./include/MLX42/build/libmlx42.a
-LIBS = -L$(PATH_MLX)/build -lmlx42 -L$(PATH_LIBFT) -lft -L"/opt/homebrew/opt/glfw/lib" -lglfw -framework Cocoa -framework OpenGL -framework IOKit
+#! 42 - BKK Machine
+# LIBS := $(LIBMLX)/build/libmlx42.a -ldl -lglfw -pthread -lm
+#! Personal Machine
+LIBS := $(LIBMLX)/build/libmlx42.a -ldl -lglfw -L"/opt/homebrew/opt/glfw/lib" -pthread -lm
 
-# Source Files Categories
-ALGORITHM_SRC	=	01_render.c			\
-					02_render.c
+ALGORITHM_SRC =		convert_matrix.c	\
+					get_dims.c			\
+					map_read.c			\
+					render.c			\
+					draw_line.c
 
-ERRORHANDLE_SRC	=	01_read_map.c		\
-					02_read_map.c
-
-TOOLS_SRC		=	keyboard.c			\
-					menu.c				\
-					mouse.c				\
-					view.c
+MISC_SRC =			ft_free.c			\
+					parser.c			\
+					utils.c
 
 ALGORITHM_SRCS = $(addprefix $(PATH_SRCS)/algorithm/, $(ALGORITHM_SRC))
-ERRORHANDLE_SRCS = $(addprefix $(PATH_SRCS)/errorhandle/, $(ERRORHANDLE_SRC))
-TOOLS_SRCS = $(addprefix $(PATH_SRCS)/tools/, $(TOOLS_SRC))
+MISC_SRCS = $(addprefix $(PATH_SRCS)/misc/, $(MISC_SRC))
 
-SRCS = $(PATH_SRCS)/fdf.c $(ALGORITHM_SRCS) $(ERRORHANDLE_SRCS) $(TOOLS_SRCS)
-OBJS = $(addprefix $(PATH_OBJ)/, $(patsubst $(PATH_SRCS)/%.c, %.o, $(SRCS)))
+SRCS = $(PATH_SRCS)/fdf.c $(ALGORITHM_SRCS) $(MISC_SRCS)
+OBJ_FILES := $(SRCS:$(PATH_SRCS)/%.c=$(OBJ_DIR)/%.o)
 
-all: $(NAME)
-
-$(NAME): $(OBJS) $(MLX)
-	@make -C $(PATH_LIBFT)
-	@$(CC) $(CFLAGS) -o $(NAME) $(OBJS) $(LIBS)
-	@echo "[$(COLOR_YELLOW)$(NAME) --> OK$(COLOR_RESET)]\n${COLOR_GREEN}Success!${COLOR_RESET}"
-	@echo "$(COLOR_PINK)\tUsage: ./$(NAME)$(COLOR_RESET)"
-
-$(PATH_OBJ)/%.o: $(PATH_SRCS)/%.c
+$(OBJ_DIR)/%.o: $(PATH_SRCS)/%.c
 	@mkdir -p $(@D)
-	@$(CC) $(CFLAGS) -c $< -o $@
-	@echo "$(COLOR_GREEN)Compiled:$(COLOR_RESET) $<"
+	@$(CC) $(CFLAGS) -I$(PATH_HEADER) -c $< -o $@
+	@printf "$(COLOR_GREEN)Compiled: $(CC) $(CFLAGS)$(COLOR_RESET) %-40s\r" "$(notdir $<)"
+	@printf "\n"
 
-$(MLX):
-	@cmake $(PATH_MLX) -B $(PATH_MLX)/build && make -C $(PATH_MLX)/build -j4
+all: libmlx $(NAME)
+
+$(NAME): $(OBJ_DIR) $(OBJ_FILES)
+	@make -C $(PATH_LIBFT)
+	@make libmlx
+	@$(CC) $(CFLAGS) -o $(NAME) $(OBJ_FILES) $(LIBS) -L$(PATH_LIBFT) -lft
+	@printf "[$(COLOR_YELLOW)$(NAME) --> OK$(COLOR_RESET)]\n ${COLOR_GREEN}Success!${COLOR_RESET}\n"
+	@printf "$(COLOR_PINK)\tUsage: ./fdf [PATH Map]$(COLOR_RESET)\n"
+
+$(OBJ_DIR):
+	@mkdir -p $(OBJ_DIR)
+
+libmlx:
+	git clone https://github.com/codam-coding-college/MLX42.git $(PATH_HEADER)/MLX42; \
+	cmake $(LIBMLX) -B $(LIBMLX)/build && make -C $(LIBMLX)/build -j4; \
+
+norm:
+	@printf "$(COLOR_YELLOW)"
+	@norminette $(PATH_SRCS) | grep -E "Error"
+	@printf "$(COLOR_RESET)"
 
 clean:
-	@make clean -C $(PATH_LIBFT)
-	@$(RM) $(PATH_MLX)/build
-	@$(RM) $(PATH_OBJ)
-	@$(RM) .DS_Store
-	@echo "$(COLOR_RED)Cleaned up object files$(COLOR_RESET)"
+	@$(RM) $(OBJ_DIR)
+	@make -C $(PATH_LIBFT) clean
+	@rm -rf $(LIBMLX)
+	@echo "$(COLOR_RED)Cleaned up MLX42$(COLOR_RESET)"
+	@rm -rf .DS_Store
 
 fclean: clean
-	@make fclean -C $(PATH_LIBFT)
 	@$(RM) $(NAME)
-	@echo "$(COLOR_RED)Cleaned up executables$(COLOR_RESET)"
+	@make -C $(PATH_LIBFT) fclean
 
 re: fclean all
 
-.PHONY: all clean fclean re
+.PHONY: all clean fclean re libmlx

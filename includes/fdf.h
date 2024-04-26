@@ -5,53 +5,116 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: jikarunw <jikarunw@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/02/29 03:39:09 by jikarunw          #+#    #+#             */
-/*   Updated: 2024/04/18 14:26:24 by jikarunw         ###   ########.fr       */
+/*   Created: 2024/02/24 20:35:33 by jikarunw          #+#    #+#             */
+/*   Updated: 2024/04/26 18:21:51 by jikarunw         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef FDF_H
 # define FDF_H
 
-# define WIDTH 1920
-# define HEIGHT 1080
-
-# include <math.h>
-# include <fcntl.h>
-
 # include "./MLX42/include/MLX42/MLX42.h"
-# include "./libft/includes/libft.h"
-# include "./libft/includes/get_next_line.h"
-# include "./libft/includes/ft_printf.h"
+# include "../libft/includes/libft.h"
+# include "../libft/includes/ft_printf.h"
+# include "../libft/includes/get_next_line.h"
 
-typedef struct s_fdfmap
-{
-	int				z;
-	uint8_t			r;
-	uint8_t			g;
-	uint8_t			b;
-	uint8_t			a;
-	int				x_draw;
-	int				y_draw;
-}					t_fdfmap;
+# include <fcntl.h>
+# include <math.h>
 
-typedef struct s_fdfvariables
+# define WIDTH 1280
+# define HEIGHT 720
+
+typedef struct s_coords
 {
-	t_fdfmap	*map;
+	float	x;
+	float	y;
+	float	z;
+}				t_coords;
+
+typedef struct	s_map
+{
+	int				width;
+	int				height;
+	float			scale;
+	t_coords		*s_coord;
+	struct s_map	*next;
+}				t_map;
+
+typedef struct	s_matrix_width
+{
+	float		width;
+	float		min_width;
+	float		max_width;
+}				t_matrix_width;
+
+typedef struct	s_matrix_height
+{
+	float		height;
+	float		min_height;
+	float		max_height;
+}				t_matrix_height;
+
+typedef struct	s_matrix_dimens
+{
+	float	matrix_height;
+	float	matrix_width;
+}				t_matrix_dimens;
+
+typedef struct	s_draw_line
+{
+	int			dx;
+	int			dy;
+	int			control;
+	int			offset_x;
+	int			offset_y;
 	mlx_image_t	*img;
-	mlx_image_t	*menu;
-	mlx_t		*mlx;
-	int			map_width;
-	int			map_height;
-	int			window_width;
-	int			window_height;
-	int			z_max;
-	int			zoom;
-	float		z_zoom;
-	float		x_zoom;
-	double		radians;
-	double		radians2;
-	char		view;
-}					t_fdfvariables;
+}				t_draw_line;
+
+/***********************
+ *   SECTION - FREE    *
+ * PATH DIR: SRCS/MISC *
+ ***********************/
+
+/* utils.c */
+t_draw_line		*new_line(mlx_image_t *img, float **mconvert_matrix, int start, int end);
+void			draw_background(mlx_image_t *img);
+void			put_pixel(mlx_image_t *img, int x, int y, int color);
+
+/* parser.c */
+int				ft_parser_map(const char *argv);
+
+/* ft_free.c */
+void			free_data(t_map *data);
+void			free_split(char **split);
+void			free_matrix(float **map);
+
+/****************************
+ *   SECTION - ALGORITHM    *
+ * PATH DIR: SRCS/ALGORITHM *
+ ****************************/
+
+/* render.c */
+void			render(t_map *map, mlx_image_t *img);
+float			**get_map_matrix(t_map *map);
+float			**convert_matrix(t_map *map, float **map_matrix);
+void			draw_map(t_map *map, mlx_image_t *img, float **convert_matrix);
+
+/* map_read.c */
+t_map			*map_read(const char *argv);
+t_map			*new_list(char *line, int y);
+t_map			*insert_node(t_map *head, t_map *list);
+t_map			*new_node(int x, int y, int z);
+
+/* get_dims.c */
+t_matrix_width	*get_matrix_width(float **map_matrix, t_map *map);
+t_matrix_height	*get_matrix_height(float **map_matrix, t_map *map);
+t_matrix_dimens	*get_matrix_dimes(float **map_matrix, t_map *map);
+
+/* convert_matrix.c */
+void			get_map_scale(t_map *map);
+float			**scale_dimes_matrix(t_map *map, float **map_matrix, t_matrix_dimens *matrix_dimes);
+
+/* draw_line.c */
+void			draw_line(mlx_image_t *img, float **convert_matrix, int start, int end);
 
 #endif
