@@ -118,6 +118,7 @@ ${OBJ_DIR}/%.o: ${LOCAL_SRC_PATH}/%.c
 clean:
 	@echo "$(COLOR_RED)Cleaning object files...$(COLOR_RESET)"
 	@rm -rf $(OBJ_DIR)
+	@rm -rf .DS_Store
 
 fclean: clean
 	@echo "$(COLOR_RED)Cleaning$(COLOR_RESET)$(COLOR_PINK) $(NAME)!$(COLOR_RESET)"

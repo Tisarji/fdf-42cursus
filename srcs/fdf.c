@@ -6,7 +6,7 @@
 /*   By: jikarunw <jikarunw@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/24 20:34:39 by jikarunw          #+#    #+#             */
-/*   Updated: 2024/04/26 18:11:50 by jikarunw         ###   ########.fr       */
+/*   Updated: 2024/04/28 13:57:15 by Tisarji          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ static void	init_help_mlx(mlx_t *mlx)
 	mlx_terminate(mlx);
 	return ;
 }
+
 int	main(int argc, char **argv)
 {
 	t_map		*map;

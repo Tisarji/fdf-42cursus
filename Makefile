@@ -32,7 +32,8 @@ ALGORITHM_SRC =		convert_matrix.c	\
 
 MISC_SRC =			ft_free.c			\
 					parser.c			\
-					utils.c
+					utils.c				\
+					# color.c
 
 ALGORITHM_SRCS = $(addprefix $(PATH_SRCS)/algorithm/, $(ALGORITHM_SRC))
 MISC_SRCS = $(addprefix $(PATH_SRCS)/misc/, $(MISC_SRC))
