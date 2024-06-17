@@ -1,5 +1,7 @@
 # Fil de Fer (FDF)
 
+<img width="1325" alt="Screenshot_2567-06-17_at_09 43 33" src="https://github.com/Tisarji/fdf-42cursus/assets/48820052/767aec19-1f14-43f6-bf5d-3d0168ab02a7">
+
 ## 📝 Introduction
 
 **Fil de Fer (FDF)** is a project from the 42 programming school curriculum. It involves creating a simplified 3D graphic representation of a wireframe model, where each point is connected by lines. The project is primarily focused on enhancing your skills in computer graphics, working with C programming, and manipulating graphical libraries.
