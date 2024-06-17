@@ -6,45 +6,33 @@
 /*   By: jikarunw <jikarunw@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/23 20:34:31 by jikarunw          #+#    #+#             */
-/*   Updated: 2024/04/23 22:31:14 by jikarunw         ###   ########.fr       */
+/*   Updated: 2024/06/10 04:29:25 by jikarunw         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/fdf.h"
 
-void	free_data(t_map *data)
+void	free_fdf(t_fdf *fdf)
 {
-	t_map	*temp;
+	free_matrix(fdf->map);
+	free(fdf->map);
+	free(fdf->scale);
+	free(fdf);
+}
 
-	while (data != NULL)
-	{
-		temp = data;
-		data = data->next;
-		if (temp->s_coord != NULL)
-		{
-			free(temp->s_coord);
-			temp->s_coord = NULL;
-		}
-		free(temp);
-	}
+void	free_matrix(t_map *map)
+{
+	while (map->height--)
+		free(map->matrix[map->height]);
+	free(map->matrix);
 }
 
 void	free_split(char **split)
 {
-	int	i;
+	int i;
 
 	i = 0;
 	while (split[i])
 		free(split[i++]);
 	free(split);
-}
-
-void	free_matrix(float **map)
-{
-	int	i;
-
-	i = 0;
-	while (map[i] != NULL)
-		free(map[i++]);
-	free(map);
 }

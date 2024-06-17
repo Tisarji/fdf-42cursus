@@ -20,20 +20,19 @@ CFLAGS := -Wextra -Wall -Werror -Wunreachable-code -Ofast
 LIBMLX := ./includes/MLX42
 
 #! 42 - BKK Machine
-# LIBS := $(LIBMLX)/build/libmlx42.a -ldl -lglfw -pthread -lm
+LIBS := $(LIBMLX)/build/libmlx42.a -ldl -lglfw -pthread -lm
 #! Personal Machine
-LIBS := $(LIBMLX)/build/libmlx42.a -ldl -lglfw -L"/opt/homebrew/opt/glfw/lib" -pthread -lm
+# LIBS := $(LIBMLX)/build/libmlx42.a -ldl -lglfw -L"/opt/homebrew/opt/glfw/lib" -pthread -lm
 
-ALGORITHM_SRC =		convert_matrix.c	\
-					get_dims.c			\
-					map_read.c			\
+ALGORITHM_SRC =		load_map.c			\
+					init.c				\
 					render.c			\
 					draw_line.c
 
 MISC_SRC =			ft_free.c			\
-					parser.c			\
-					utils.c				\
-					# color.c
+					map_parser.c			\
+					line_utils.c		\
+					valid_utils.c
 
 ALGORITHM_SRCS = $(addprefix $(PATH_SRCS)/algorithm/, $(ALGORITHM_SRC))
 MISC_SRCS = $(addprefix $(PATH_SRCS)/misc/, $(MISC_SRC))
@@ -47,7 +46,7 @@ $(OBJ_DIR)/%.o: $(PATH_SRCS)/%.c
 	@printf "$(COLOR_GREEN)Compiled: $(CC) $(CFLAGS)$(COLOR_RESET) %-40s\r" "$(notdir $<)"
 	@printf "\n"
 
-all: libmlx $(NAME)
+all: $(NAME)
 
 $(NAME): $(OBJ_DIR) $(OBJ_FILES)
 	@make -C $(PATH_LIBFT)
@@ -71,8 +70,6 @@ norm:
 clean:
 	@$(RM) $(OBJ_DIR)
 	@make -C $(PATH_LIBFT) clean
-	@rm -rf $(LIBMLX)
-	@echo "$(COLOR_RED)Cleaned up MLX42$(COLOR_RESET)"
 	@rm -rf .DS_Store
 
 fclean: clean

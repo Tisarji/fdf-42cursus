@@ -6,7 +6,7 @@
 /*   By: jikarunw <jikarunw@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/24 20:35:33 by jikarunw          #+#    #+#             */
-/*   Updated: 2024/05/27 16:01:09 by jikarunw         ###   ########.fr       */
+/*   Updated: 2024/06/16 15:01:32 by jikarunw         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,88 +24,78 @@
 # define WIDTH 1280
 # define HEIGHT 720
 
-# define DEFALUT_COLOR 0xFFFFFFFF
-# define COOL_COLOR 0x0000FF
-# define WARM_COLOR 0xFF0000
+# define SLOPE_THRESHOLD 1.0
 
-typedef struct s_coords
-{
-	float	x;
-	float	y;
-	float	z;
-}				t_coords;
+#define BASE_LOW "0123456789ABCDEF"
+#define BASE_UPPER "0123456789abcdef"
 
-typedef struct	s_map
+typedef struct s_point
 {
-	int				width;
-	int				height;
-	float			scale;
-	t_coords		*s_coord;
-	struct s_map	*next;
-}					t_map;
-
-typedef struct	s_matrix_width
-{
-	float			width;
-	float			min_width;
-	float			max_width;
-}					t_matrix_width;
-
-typedef struct	s_matrix_height
-{
-	float			height;
-	float			min_height;
-	float			max_height;
-}					t_matrix_height;
-
-typedef struct	s_matrix_dimens
-{
-	float			matrix_height;
-	float			matrix_width;
-}					t_matrix_dimens;
-
-typedef struct	s_draw_line
-{
-	int				dx;
-	int				dy;
-	int				control;
-	int				offset_x;
-	int				offset_y;
-	mlx_image_t		*img;
-}					t_draw_line;
-
-typedef struct s_color
-{
-	uint8_t		r1;
-	uint8_t		r2;
-	uint8_t		g1;
-	uint8_t		g2;
-	uint8_t		b1;
-	uint8_t		b2;
-	uint8_t		a;
+	float		x;
+	float		y;
+	float		z;
 	uint32_t	color;
-}	t_color;
+}				t_point;
+
+typedef struct s_map
+{
+	t_point		**matrix;
+	int			width;
+	int			height;
+	float		z_max;
+}				t_map;
+
+typedef struct s_scale
+{
+	float		scale;
+	float		x_offset;
+	float		y_offset;
+	float		z_scale;
+}				t_scale;
+
+typedef struct s_draw_line
+{
+	int			dx;
+	int			dy;
+	int			control;
+	int			inc_x;
+	int			inc_y;
+}				t_draw_line;
+
+typedef struct s_fdf
+{
+	mlx_t		*mlx;
+	mlx_image_t	*img;
+	t_map		*map;
+	t_scale		*scale;
+}				t_fdf;
 
 /***********************
  *   SECTION - FREE    *
  * PATH DIR: SRCS/MISC *
  ***********************/
 
-/* utils.c */
-t_draw_line		*new_line(mlx_image_t *img, float **mconvert_matrix, int start, int end);
-void			draw_background(mlx_image_t *img);
-void			put_pixel(mlx_image_t *img, int x, int y, int color);
+/* utils_01.c */
+void			initialize_line_data(t_draw_line *line, t_point start, t_point end);
+t_point			**allocate_matrix(int width, int height);
+void			draw_background(t_fdf *fdf);
+void			put_pixel(t_fdf *fdf, int x, int y, uint32_t color);
+void			window_close(void *param);
+
+/* utils_02.c */
+int				validate_line_count(int fd, int expected_line_count);
+uint32_t		apply_alpha(uint32_t color);
+void			handle_invalid_map(t_fdf *fdf, t_map *map);
+float			calculate_scale(t_fdf *fdf);
+void			center_map(t_map *map);
 
 /* parser.c */
-int				ft_parser_map(const char *argv);
+void			parse_map_file(char *file_path);
 
 /* ft_free.c */
-void			free_data(t_map *data);
+void			free_fdf(t_fdf *fdf);
+void			free_matrix(t_map *map);
 void			free_split(char **split);
-void			free_matrix(float **map);
-
-/* color.c */
-int				gradient_color(int y1, int y2, int step, int steps);
 
 /****************************
  *   SECTION - ALGORITHM    *
@@ -113,27 +103,25 @@ int				gradient_color(int y1, int y2, int step, int steps);
  ****************************/
 
 /* render.c */
-void			render(t_map *map, mlx_image_t *img);
-float			**get_map_matrix(t_map *map);
-float			**convert_matrix(t_map *map, float **map_matrix);
-void			draw_map(t_map *map, mlx_image_t *img, float **convert_matrix);
+void			render(t_fdf *fdf);
+void			transform_points(t_fdf *fdf, t_point start, t_point end);
+void			scale_points(t_fdf *fdf, t_point *start, t_point *end);
+void			convert_to_isometric(t_fdf *fdf, t_point *start, t_point *end);
+void			centralize_points(t_fdf *fdf, t_point *start, t_point *end);
+
 
 /* map_read.c */
-t_map			*map_read(const char *argv);
-t_map			*new_list(char *line, int y);
-t_map			*insert_node(t_map *head, t_map *list);
-t_map			*new_node(int x, int y, int z);
+t_fdf			*initialize_fdf(char *map_name);
+t_map			*initialize_map(void);
+t_scale			*initialize_camera(t_fdf *fdf);
 
 /* get_dims.c */
-t_matrix_width	*get_matrix_width(float **map_matrix, t_map *map);
-t_matrix_height	*get_matrix_height(float **map_matrix, t_map *map);
-t_matrix_dimens	*get_matrix_dimes(float **map_matrix, t_map *map);
+
 
 /* convert_matrix.c */
-void			get_map_scale(t_map *map);
-float			**scale_dimes_matrix(t_map *map, float **map_matrix, t_matrix_dimens *matrix_dimes);
+t_map			*load_map(t_fdf *fdf, char *map_name);
 
 /* draw_line.c */
-void			draw_line(mlx_image_t *img, float **convert_matrix, int start, int end);
+void			draw_line(t_fdf *fdf, t_point start, t_point end);
 
 #endif

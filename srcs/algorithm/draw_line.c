@@ -6,131 +6,77 @@
 /*   By: jikarunw <jikarunw@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/24 18:30:16 by jikarunw          #+#    #+#             */
-/*   Updated: 2024/05/23 20:53:09 by jikarunw         ###   ########.fr       */
+/*   Updated: 2024/06/17 09:22:45 by jikarunw         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/fdf.h"
 
-static void	draw_vertical(t_draw_line *line, float **convert_matrix, int start, int end)
+static void draw_bresenham_line(t_fdf *fdf, t_point start, t_point end)
 {
-	int	y;
+	int dx = ft_abs((int)end.x - (int)start.x);
+	int dy = ft_abs((int)end.y - (int)start.y);
+	int sx = start.x < end.x ? 1 : -1;
+	int sy = start.y < end.y ? 1 : -1;
+	int err = (dx > dy ? dx : -dy) / 2;
+	int e2;
 
-	y = 0;
-	if ((int)convert_matrix[end][1] > convert_matrix[start][1])
+	while (1)
 	{
-		while ((int)convert_matrix[start][1] != (int)convert_matrix[end][1])
+		put_pixel(fdf, (int)start.x, (int)start.y, start.color);
+		if ((int)start.x == (int)end.x && (int)start.y == (int)end.y)
+			break;
+		e2 = err;
+		if (e2 > -dx)
 		{
-			put_pixel(line->img, (int)convert_matrix[start][0], (int)convert_matrix[start][1], 0xFFFFFFFF);
-			convert_matrix[start][1]++;
-			y++;
+			err -= dy;
+			start.x += sx;
+		}
+		if (e2 < dy)
+		{
+			err += dx;
+			start.y += sy;
 		}
 	}
+}
+
+static void draw_dda_line(t_fdf *fdf, t_point start, t_point end)
+{
+	float	dx;
+	float	dy;
+	int		steps;
+	float	xIncrement; 
+	float	yIncrement; 
+
+	float x = start.x;
+	float y = start.y;
+	dx = end.x - start.x;
+	dy = end.y - start.y;
+	if (ft_abs(dx) > ft_abs(dy))
+		steps = ft_abs(dx);
 	else
+		steps = ft_abs(dy);
+	xIncrement = dx / (float)steps;
+	yIncrement = dy / (float)steps;
+
+	int i = 0;
+	while (i++ <= steps)
 	{
-		while ((int)convert_matrix[start][1] != (int)convert_matrix[end][1])
-		{
-			put_pixel(line->img, (int)convert_matrix[start][0], (int)convert_matrix[start][1], 0xFFFFFFFF);
-			convert_matrix[start][1]--;
-			y--;
-		}
+		put_pixel(fdf, (int)x, (int)y, start.color);
+		x += xIncrement;
+		y += yIncrement;
 	}
-	convert_matrix[start][1] -= y;
 }
 
-static void	draw_horizontal(t_draw_line *line, float **convert_matrix, int start, int end)
-{
-	int	x;
 
-	x = 0;
-	if ((int)convert_matrix[end][0] > (int)convert_matrix[start][0])
-	{
-		while ((int)convert_matrix[start][0] != (int)convert_matrix[end][0])
-		{
-			put_pixel(line->img, (int)convert_matrix[start][0], (int)convert_matrix[start][1], 0xFFFFFFFF);
-			convert_matrix[start][0]++;
-			x++;
-		}
-	}
+void draw_line(t_fdf *fdf, t_point start, t_point end)
+{
+	float dx = end.x - start.x;
+	float dy = end.y - start.y;
+	float slope = ft_abs(dy / dx);
+
+	if (slope < SLOPE_THRESHOLD)
+		draw_dda_line(fdf, start, end);
 	else
-	{
-		while ((int)convert_matrix[start][0] != (int)convert_matrix[end][0])
-		{
-			put_pixel(line->img, (int)convert_matrix[start][0], (int)convert_matrix[start][1], 0xFFFFFFFF);
-			convert_matrix[start][0]--;
-			x--;
-		}
-	}
-	convert_matrix[start][0] -= x;
-}
-
-static void draw_line_x_axis(t_draw_line *line, float **convert_matrix, int start, int end)
-{
-	int	x;
-	int	y;
-
-	x = 0;
-	y = 0;
-	line->control = line->dx / 2;
-	put_pixel(line->img, (int)convert_matrix[start][0], (int)convert_matrix[start][1], 0xFFFFFFFF);
-	while ((int)convert_matrix[start][0] != (int)convert_matrix[end][0])
-	{
-		convert_matrix[start][0] += line->offset_x;
-		x += line->offset_x;
-		line->control -= line->dy;
-		if (line->control < 0)
-		{
-			convert_matrix[start][1] += line->offset_y;
-			y += line->offset_y;
-			line->control += line->dx;
-		}
-		put_pixel(line->img, (int)convert_matrix[start][0], (int)convert_matrix[start][1], 0xFFFFFFFF);
-	}
-	convert_matrix[start][0] -= x;
-	convert_matrix[start][1] -= y;
-}
-
-static void draw_line_y_axis(t_draw_line *line, float **convert_matrix, int start, int end)
-{
-	int	x;
-	int	y;
-
-	x = 0;
-	y = 0;
-	line->control = line->dy / 2;
-	put_pixel(line->img, (int)convert_matrix[start][0], (int)convert_matrix[start][1], 0xFFFFFFFF);
-	while ((int)convert_matrix[start][1] != (int)convert_matrix[end][1])
-	{
-		convert_matrix[start][1] += line->offset_y;
-		y += line->offset_y;
-		line->control -= line->dx;
-		if (line->control < 0)
-		{
-			convert_matrix[start][0] += line->offset_x;
-			x += line->offset_x;
-			line->control += line->dy;
-		}
-		put_pixel(line->img, (int)convert_matrix[start][0], (int)convert_matrix[start][1], 0xFFFFFFFF);
-	}
-	convert_matrix[start][0] -= x;
-	convert_matrix[start][1] -= y;
-}
-
-void	draw_line(mlx_image_t *img, float **convert_matrix, int start, int end)
-{
-	t_draw_line	*line;
-
-	line = new_line(img, convert_matrix, start, end);
-	if (line->dx == 0)
-		draw_vertical(line, convert_matrix, start, end);
-	else if (line->dy == 0)
-		draw_horizontal(line, convert_matrix, start, end);
-	else
-	{
-		if (line->dx >= line->dy)
-			draw_line_x_axis(line, convert_matrix, start, end);
-		else
-			draw_line_y_axis(line, convert_matrix, start, end);
-	}
-	free(line);
+		draw_bresenham_line(fdf, start, end);
 }
